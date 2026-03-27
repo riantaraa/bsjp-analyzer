@@ -199,9 +199,8 @@ if not st.session_state.logged_in:
                     with st.spinner("Memverifikasi data langganan..."):
                         try:
                             # HACK MEMBACA GOOGLE SHEETS TANPA SECRETS
-                            # Mengambil ID dari screenshot kamu
-                            sheet_id = "1uBRvNXmDLKo38XPjWpAkd3_ObESaBjc6HFdVKjF34KE"
-                            sheet_url = f"https://docs.google.com/spreadsheets/d/{sheet_id}/export?format=csv"
+            
+                            sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQinu9enAvHah_v6LnlSZmiKkba_7XqepjCIjVL67HE1iCvAK0ETxSdlww47_dHh0wtkcX7TeEmAk82/pub?output=csv"
                             
                             # Pandas membaca link tersebut sebagai CSV (Jauh lebih cepat dan stabil)
                             users_df = pd.read_csv(sheet_url)
