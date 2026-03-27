@@ -210,12 +210,14 @@ if not st.session_state.logged_in:
                             
                             if len(user_data) > 0:
                                 # PERHATIKAN ADA TAMBAHAN DI SINI
-                                db_password = str(user_data['Password'].values).strip()
-                                
-                                if db_password == pass_input.strip():
-                                    # PERHATIKAN ADA TAMBAHAN DI SINI JUGA
-                                    exp_date_str = str(user_data['Expired_Date'].values).strip()
-                                    exp_date = pd.to_datetime(exp_date_str).date()
+                                # PERHATIKAN ADA DI SINI
+                            db_password = str(user_data['Password'].values).strip()
+                            
+                            if db_password == pass_input.strip():
+                                # PERHATIKAN ADA DI SINI JUGA
+                                exp_date_str = str(user_data['Expired_Date'].values).strip()
+                                exp_date = pd.to_datetime(exp_date_str).date()
+                                hari_ini = datetime.now().date()
                                     hari_ini = datetime.now().date()
                                     
                                     if hari_ini <= exp_date:
