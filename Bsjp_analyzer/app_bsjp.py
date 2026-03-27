@@ -33,7 +33,8 @@ def main_app():
     st.info(f"👤 Selamat datang, **{st.session_state.username}**! Masa aktif langganan diverifikasi.")
     st.markdown("---")
 
-    col_search, _ = st.columns([1, 2]) 
+    # PERBAIKAN BUG KOLOM: Sudah menggunakan angka
+    col_search, _ = st.columns()
     with col_search:
         ticker_input = st.text_input("🔍 Masukkan kode emiten (contoh: DSNG, APLN):", "").upper()
 
@@ -50,8 +51,17 @@ def main_app():
             with st.spinner(f"Membedah anatomi bandar {nama_saham}..."):
                 try:
                     stock = yf.Ticker(ticker)
-                    # Trik Bypass Cache Yahoo Finance agar data selalu FRESH 100%
-                    df = stock.history(period="max").tail(800)
+                    
+                    # JURUS ANTI CACHE: Paksa mesin pakai Zona Waktu Jakarta dan Tanggal Spesifik
+                    sekarang = pd.Timestamp.now(tz="Asia/Jakarta")
+                    besok = sekarang + pd.Timedelta(days=1)
+                    tiga_tahun_lalu = sekarang - pd.Timedelta(days=1095)
+                    
+                    df = stock.history(
+                        start=tiga_tahun_lalu.strftime('%Y-%m-%d'),
+                        end=besok.strftime('%Y-%m-%d')
+                    )
+                    
                     if df.empty or len(df) < 60:
                         st.error("⚠️ Data tidak cukup.")
                         continue
@@ -149,7 +159,7 @@ def main_app():
                         elif neg_ma20 > pos_ma20: trend_status_str = "❌ FAIL (Mayoritas Historis Negatif)"; c_trend_pass = False
                         else: trend_status_str = "➖ NETRAL (Historis Seimbang)"; c_trend_pass = True
                     else:
-                        trend_status_str = "❌ FAIL (Bukan True Breakout MA20 Hari Hari Ini)"
+                        trend_status_str = "❌ FAIL (Bukan True Breakout MA20 Hari Ini)"
                         c_trend_pass = False
 
                     st.subheader("📋 CEK SOP FINAL (LAPIS 2)")
