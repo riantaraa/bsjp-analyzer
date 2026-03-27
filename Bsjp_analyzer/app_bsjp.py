@@ -50,7 +50,8 @@ def main_app():
             with st.spinner(f"Membedah anatomi bandar {nama_saham}..."):
                 try:
                     stock = yf.Ticker(ticker)
-                    df = stock.history(period="3y")
+                    # Trik Bypass Cache Yahoo Finance agar data selalu FRESH 100%
+                    df = stock.history(period="max").tail(800)
                     if df.empty or len(df) < 60:
                         st.error("⚠️ Data tidak cukup.")
                         continue
