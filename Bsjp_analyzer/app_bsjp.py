@@ -205,13 +205,17 @@ if not st.session_state.logged_in:
                             
                             users_df = pd.read_csv(sheet_url)
                             
-                            user_data = users_df[users_df['Username'] == user_input]
+                            # Sapu bersih spasi tersembunyi di kolom Username
+                            users_df['Username'] = users_df['Username'].astype(str).str.strip()
+                            
+                            user_data = users_df[users_df['Username'] == user_input.strip()]
+                            
                             if len(user_data) > 0:
-                                # PERBAIKAN PANDAS SAFE EXTRACTION
-                                db_password = str(user_data['Password'].values)
+                                # Sapu bersih spasi di Password dari database dan dari ketikan user
+                                db_password = str(user_data['Password'].values).strip()
                                 
-                                if db_password == pass_input:
-                                    exp_date_str = str(user_data['Expired_Date'].values)
+                                if db_password == pass_input.strip():
+                                    exp_date_str = str(user_data['Expired_Date'].values).strip()
                                     exp_date = pd.to_datetime(exp_date_str).date()
                                     hari_ini = datetime.now().date()
                                     
