@@ -4,6 +4,19 @@ import pandas as pd
 import pandas_ta as ta
 from datetime import datetime
 
+# ========================================================
+# 🗄️ DATABASE USER VIP (UPDATE MANUAL DI SINI)
+# ========================================================
+# Format: "username": {"password": "passwordnya", "exp_date": "YYYY-MM-DD"}
+USER_DATABASE = {
+    "rian": {"password": "cuan123", "exp_date": "2026-12-31"},
+    "helo": {"password": "1234", "exp_date": "2026-12-10"},
+    
+    # Cara menambahkan user baru, cukup copy-paste baris di atas, contoh:
+    # "budi": {"password": "passbudi", "exp_date": "2026-06-30"},
+}
+# ========================================================
+
 # --- KONFIGURASI HALAMAN ---
 st.set_page_config(page_title="AI BSJP Analyzer", page_icon="📈", layout="wide")
 
@@ -135,7 +148,7 @@ def main_app():
                         elif neg_ma20 > pos_ma20: trend_status_str = "❌ FAIL (Mayoritas Historis Negatif)"; c_trend_pass = False
                         else: trend_status_str = "➖ NETRAL (Historis Seimbang)"; c_trend_pass = True
                     else:
-                        trend_status_str = "❌ FAIL (Bukan True Breakout MA20 Hari Ini)"
+                        trend_status_str = "❌ FAIL (Bukan True Breakout MA20 Hari Hari Ini)"
                         c_trend_pass = False
 
                     st.subheader("📋 CEK SOP FINAL (LAPIS 2)")
@@ -188,8 +201,8 @@ if not st.session_state.logged_in:
         st.markdown("Silakan masukkan akun berlangganan Anda.")
         
         with st.form("login_form"):
-            user_input = st.text_input("Username")
-            pass_input = st.text_input("Password", type="password")
+            user_input = st.text_input("Username").strip().lower() # Hilangkan spasi & kecilkan huruf
+            pass_input = st.text_input("Password", type="password").strip()
             submit_button = st.form_submit_button("Login Sekarang", use_container_width=True)
             
             if submit_button:
@@ -197,38 +210,25 @@ if not st.session_state.logged_in:
                     st.warning("Username dan Password harus diisi.")
                 else:
                     with st.spinner("Memverifikasi data langganan..."):
-                        try:
-                            # 100% LOKAL: Membaca file users.csv yang ada di folder Github yang sama
-                            users_df = pd.read_csv("users.csv", dtype=str)
+                        # Langsung tembak ke kamus data di atas
+                        if user_input in USER_DATABASE:
+                            user_data = USER_DATABASE[user_input]
                             
-                            # Filter Username
-                            user_data = users_df[users_df['Username'].str.strip() == user_input.strip()]
-                            
-                            if len(user_data) > 0:
-                                # Ambil data spesifik
-                                db_password = str(user_data['Password'].values).strip()
+                            if pass_input == user_data["password"]:
+                                # Ubah string tanggal jadi format waktu asli
+                                exp_date = datetime.strptime(user_data["exp_date"], "%Y-%m-%d").date()
+                                hari_ini = datetime.now().date()
                                 
-                                if db_password == pass_input.strip():
-                                    exp_date_str = str(user_data['Expired_Date'].values).strip()
-                                    exp_date = pd.to_datetime(exp_date_str).date()
-                                    hari_ini = datetime.now().date()
-                                    
-                                    if hari_ini <= exp_date:
-                                        # BERHASIL
-                                        st.session_state.logged_in = True
-                                        st.session_state.username = user_input
-                                        st.success("Login Berhasil!")
-                                        st.rerun() 
-                                    else:
-                                        st.error(f"❌ Akun kedaluwarsa sejak {exp_date}. Hubungi Admin untuk perpanjang.")
+                                if hari_ini <= exp_date:
+                                    st.session_state.logged_in = True
+                                    st.session_state.username = user_input
+                                    st.success("Login Berhasil!")
+                                    st.rerun() 
                                 else:
-                                    st.error("❌ Password salah.")
+                                    st.error(f"❌ Akun kedaluwarsa sejak {exp_date}. Hubungi Admin untuk perpanjang.")
                             else:
-                                st.error("❌ Username tidak terdaftar.")
-                        
-                        except FileNotFoundError:
-                            st.error("❌ File 'users.csv' belum dibuat di sistem.")
-                        except Exception as e:
-                            st.error(f"Error membaca sistem login: {e}")
+                                st.error("❌ Password salah.")
+                        else:
+                            st.error("❌ Username tidak terdaftar.")
 else:
     main_app()
