@@ -33,7 +33,7 @@ def main_app():
     st.info(f"👤 Selamat datang, **{st.session_state.username}**! Masa aktif langganan diverifikasi.")
     st.markdown("---")
 
-    col_search, _ = st.columns()
+    col_search, _ = st.columns([1, 2]) 
     with col_search:
         ticker_input = st.text_input("🔍 Masukkan kode emiten (contoh: DSNG, APLN):", "").upper()
 
