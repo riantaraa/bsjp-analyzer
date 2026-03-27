@@ -198,29 +198,23 @@ if not st.session_state.logged_in:
                 else:
                     with st.spinner("Memverifikasi data langganan..."):
                         try:
-                            # HACK MEMBACA GOOGLE SHEETS TANPA SECRETS
-                            # ===== TEMPELKAN LINK PUBLISH TO WEB (.CSV) KAMU DI BAWAH INI =====
-                            sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQinu9enAvHah_v6LnlSZmiKkba_7XqepjCIjVL67HE1iCvAK0ETxSdlww47_dHh0wtkcX7TeEmAk82/pub?output=csv"
-                            # ==================================================================
+                            # 100% LOKAL: Membaca file users.csv yang ada di folder Github yang sama
+                            users_df = pd.read_csv("users.csv", dtype=str)
                             
-                            # Membaca sebagai Teks Murni (dtype=str) agar password angka tidak jadi desimal
-                            users_df = pd.read_csv(sheet_url, dtype=str)
-                            
+                            # Filter Username
                             user_data = users_df[users_df['Username'].str.strip() == user_input.strip()]
                             
                             if len(user_data) > 0:
-                                # PERHATIKAN ADA TAMBAHAN DI SINI
-                                # PERHATIKAN ADA DI SINI
-                            db_password = str(user_data['Password'].values).strip()
-                            
-                            if db_password == pass_input.strip():
-                                # PERHATIKAN ADA DI SINI JUGA
-                                exp_date_str = str(user_data['Expired_Date'].values).strip()
-                                exp_date = pd.to_datetime(exp_date_str).date()
-                                hari_ini = datetime.now().date()
+                                # Ambil data spesifik
+                                db_password = str(user_data['Password'].values).strip()
+                                
+                                if db_password == pass_input.strip():
+                                    exp_date_str = str(user_data['Expired_Date'].values).strip()
+                                    exp_date = pd.to_datetime(exp_date_str).date()
                                     hari_ini = datetime.now().date()
                                     
                                     if hari_ini <= exp_date:
+                                        # BERHASIL
                                         st.session_state.logged_in = True
                                         st.session_state.username = user_input
                                         st.success("Login Berhasil!")
@@ -231,7 +225,10 @@ if not st.session_state.logged_in:
                                     st.error("❌ Password salah.")
                             else:
                                 st.error("❌ Username tidak terdaftar.")
+                        
+                        except FileNotFoundError:
+                            st.error("❌ File 'users.csv' belum dibuat di sistem.")
                         except Exception as e:
-                            st.error(f"Gagal membaca data dari Google Sheets. Detail Error: {e}")
+                            st.error(f"Error membaca sistem login: {e}")
 else:
     main_app()
