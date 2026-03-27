@@ -203,18 +203,17 @@ if not st.session_state.logged_in:
                             sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQinu9enAvHah_v6LnlSZmiKkba_7XqepjCIjVL67HE1iCvAK0ETxSdlww47_dHh0wtkcX7TeEmAk82/pub?output=csv"
                             # ==================================================================
                             
-                            users_df = pd.read_csv(sheet_url)
+                            # Membaca sebagai Teks Murni (dtype=str) agar password angka tidak jadi desimal
+                            users_df = pd.read_csv(sheet_url, dtype=str)
                             
-                            # Sapu bersih spasi tersembunyi di kolom Username
-                            users_df['Username'] = users_df['Username'].astype(str).str.strip()
-                            
-                            user_data = users_df[users_df['Username'] == user_input.strip()]
+                            user_data = users_df[users_df['Username'].str.strip() == user_input.strip()]
                             
                             if len(user_data) > 0:
-                                # Sapu bersih spasi di Password dari database dan dari ketikan user
+                                # PERHATIKAN ADA TAMBAHAN DI SINI
                                 db_password = str(user_data['Password'].values).strip()
                                 
                                 if db_password == pass_input.strip():
+                                    # PERHATIKAN ADA TAMBAHAN DI SINI JUGA
                                     exp_date_str = str(user_data['Expired_Date'].values).strip()
                                     exp_date = pd.to_datetime(exp_date_str).date()
                                     hari_ini = datetime.now().date()
