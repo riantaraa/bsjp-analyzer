@@ -199,16 +199,19 @@ if not st.session_state.logged_in:
                     with st.spinner("Memverifikasi data langganan..."):
                         try:
                             # HACK MEMBACA GOOGLE SHEETS TANPA SECRETS
-            
+                            # ===== TEMPELKAN LINK PUBLISH TO WEB (.CSV) KAMU DI BAWAH INI =====
                             sheet_url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQinu9enAvHah_v6LnlSZmiKkba_7XqepjCIjVL67HE1iCvAK0ETxSdlww47_dHh0wtkcX7TeEmAk82/pub?output=csv"
+                            # ==================================================================
                             
-                            # Pandas membaca link tersebut sebagai CSV (Jauh lebih cepat dan stabil)
                             users_df = pd.read_csv(sheet_url)
                             
                             user_data = users_df[users_df['Username'] == user_input]
-                            if not user_data.empty:
-                                if str(user_data.iloc['Password']) == pass_input:
-                                    exp_date_str = str(user_data.iloc['Expired_Date'])
+                            if len(user_data) > 0:
+                                # PERBAIKAN PANDAS SAFE EXTRACTION
+                                db_password = str(user_data['Password'].values)
+                                
+                                if db_password == pass_input:
+                                    exp_date_str = str(user_data['Expired_Date'].values)
                                     exp_date = pd.to_datetime(exp_date_str).date()
                                     hari_ini = datetime.now().date()
                                     
@@ -224,7 +227,6 @@ if not st.session_state.logged_in:
                             else:
                                 st.error("❌ Username tidak terdaftar.")
                         except Exception as e:
-                            # Jika error, tampilkan detail kesalahannya
                             st.error(f"Gagal membaca data dari Google Sheets. Detail Error: {e}")
 else:
     main_app()
